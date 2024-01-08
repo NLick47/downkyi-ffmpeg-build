@@ -1,0 +1,14 @@
+ARG OSXCROSS_VERSION=11.3
+FROM crazymax/osxcross:${OSXCROSS_VERSION}-ubuntu AS osxcross
+
+FROM ubuntu:22.04
+RUN apt-get update && apt-get install -y clang lld libc6-dev
+
+
+
+ENV CROSS_ROOT="/cross_root"
+ENV PATH="${CROSS_ROOT}/bin:${PATH}"
+ENV CROSS_HOST=aarch64-apple-darwin20.4
+ENV LD_LIBRARY_PATH="$CROSS_ROOT/lib:$LD_LIBRARY_PATH"
+
+COPY --from=osxcross /osxcross $CROSS_ROOT

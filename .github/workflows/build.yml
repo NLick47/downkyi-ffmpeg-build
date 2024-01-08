@@ -1,0 +1,72 @@
+name: "Build"
+
+on:
+    push:
+
+jobs:
+  static-build:
+    runs-on: ubuntu-latest
+    container: "abcfy2/muslcc-toolchain-ubuntu:${{ matrix.cross_host }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        cross_host:
+          - x86_64-linux-musl
+          - x86_64-w64-mingw32
+          - i686-w64-mingw32
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: compile
+        run: |
+          "${GITHUB_WORKSPACE}/build.sh"
+      - name: zip archiving
+        env:
+          CROSS_HOST: "${{ matrix.cross_host }}"
+        run: |
+          apt install -y zip
+          ARCHIVE_NAME="ffmpeg-${CROSS_HOST}_static.zip"
+          echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
+          zip -j9v "/tmp/${ARCHIVE_NAME}" "${GITHUB_WORKSPACE}"/ffmpeg*
+      - name: Prerelease assets
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: /tmp/${{ env.ARCHIVE_NAME }}
+          prerelease: false
+          draft: false
+          tag_name: continuous
+          name: Continuous build
+      
+  static-build-osx:
+    runs-on: ubuntu-latest
+    container: "zecbd/osxcross:${{ matrix.cross_host }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        cross_host:
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: compile
+        run: |
+          "${GITHUB_WORKSPACE}/build.sh"
+      - name: zip archiving
+        env:
+          CROSS_HOST: "${{ matrix.cross_host }}"
+        run: |
+          apt install -y zip
+          ARCHIVE_NAME="ffmpeg-${CROSS_HOST}_static.zip"
+          echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
+          zip -j9v "/tmp/${ARCHIVE_NAME}" "${GITHUB_WORKSPACE}"/ffmpeg*
+      - name: Prerelease assets
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: /tmp/${{ env.ARCHIVE_NAME }}
+          prerelease: false
+          draft: false
+          tag_name: continuous
+          name: Continuous build
