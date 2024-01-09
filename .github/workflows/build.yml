@@ -30,7 +30,7 @@ jobs:
           apt install -y zip
           ARCHIVE_NAME="ffmpeg-${CROSS_HOST}_static.zip"
           echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
-          zip -j9v "/tmp/${ARCHIVE_NAME}" "${GITHUB_WORKSPACE}"/ffmpeg*
+          zip -j9v "/tmp/${ARCHIVE_NAME}" "${GITHUB_WORKSPACE}"/ffmpeg* "${GITHUB_WORKSPACE}"/LICENSE
       - name: Prerelease assets
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v1
@@ -63,7 +63,7 @@ jobs:
           apt install -y zip
           ARCHIVE_NAME="ffmpeg-${CROSS_HOST}_static.zip"
           echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
-          zip -j9v "/tmp/${ARCHIVE_NAME}" "${GITHUB_WORKSPACE}"/ffmpeg*
+          zip -j9v "/tmp/${ARCHIVE_NAME}" "${GITHUB_WORKSPACE}"/ffmpeg* "${GITHUB_WORKSPACE}"/LICENSE
       - name: Prerelease assets
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v1

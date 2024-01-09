@@ -198,42 +198,6 @@ prepare_libx265() {
 	ninja install
 }
 
-prepare_libfdk-aac() {
-	libfdk_aac_tag="2.0.3"
-	libfdk_aac_latest_url="https://github.com/mstorsjo/fdk-aac/archive/refs/tags/v${libfdk_aac_tag}.tar.gz"
-	if [ ! -f "${DOWNLOADS_DIR}/libfdk-aac-${libfdk_aac_tag}.tar.gz" ]; then
-		wget -cT10 -O "${DOWNLOADS_DIR}/libfdk-aac-${libfdk_aac_tag}.tar.gz.part" "${libfdk_aac_latest_url}"
-		mv -fv "${DOWNLOADS_DIR}/libfdk-aac-${libfdk_aac_tag}.tar.gz.part" "${DOWNLOADS_DIR}/libfdk-aac-${libfdk_aac_tag}.tar.gz"
-	fi
-	mkdir -p "${SRC_DIR}/libfdk-aac-${libfdk_aac_tag}"
-	tar -zxvf "${DOWNLOADS_DIR}/libfdk-aac-${libfdk_aac_tag}.tar.gz" --strip-components=1 -C "${SRC_DIR}/libfdk-aac-${libfdk_aac_tag}"
-	cd "${SRC_DIR}/libfdk-aac-${libfdk_aac_tag}"
-	# if [ x"${TARGET_HOST}" == xDarwin ];then
-	# 	cmake -G "Ninja" . \
-	# 	-DBUILD_SHARED_LIBS=OFF \
-	# 	-DCMAKE_SYSTEM_NAME="${TARGET_HOST}" \
-	# 	-DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
-	# 	-DCMAKE_C_COMPILER="${CC}" \
-	# 	-DCMAKE_CXX_COMPILER="${CXX}" \
-	# 	-DCMAKE_AR="${AR}" \
-	# 	-DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
-	# 	-DCMAKE_BUILD_TYPE=Release
-	# else
-	# 	cmake -G "Ninja" . \
-	# 	-DBUILD_SHARED_LIBS=OFF \
-	# 	-DCMAKE_SYSTEM_NAME="${TARGET_HOST}" \
-	# 	-DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
-	# 	-DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
-	# 	-DCMAKE_CXX_COMPILER="${CROSS_HOST}-g++" \
-	# 	-DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
-	# 	-DCMAKE_BUILD_TYPE=Release
-	# fi
-	autoreconf -fiv
-	./configure --prefix=$CROSS_PREFIX --host="${CROSS_HOST}" --disable-shared
-	make -j
-	make install
-}
-
 prepare_dav1d() {
 	dav1d_tag="1.3.0"
 	dav1d_latest_url="https://code.videolan.org/videolan/dav1d/-/archive/${dav1d_tag}/dav1d-${dav1d_tag}.tar.gz"
@@ -329,7 +293,6 @@ build_ffmpeg() {
 		--enable-pic \
 		--enable-gpl \
 		--enable-version3 \
-		--enable-nonfree \
 		--enable-static \
 		--disable-muxers \
 		--enable-muxer=mp4,mp3,flv,adts \
@@ -352,17 +315,16 @@ build_ffmpeg() {
 		--enable-libx264 \
 		--enable-libx265 \
 		--enable-libdav1d \
-		--enable-libfdk-aac \
 		--enable-libmp3lame
 	make -j
 	make install
 	make distclean
 	cp -fv "${CROSS_PREFIX}/bin/"ffmpeg* "${SELF_DIR}"
+	cp -fv "${SRC_DIR}/ffmpeg-${ffmpeg_tag}/COPYING.GPLv3" "${SELF_DIR}/LICENSE"
 }
 
 prepare_lame
 prepare_libx264
 prepare_libx265
-prepare_libfdk-aac
 prepare_dav1d
 build_ffmpeg
