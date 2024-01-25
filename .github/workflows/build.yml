@@ -15,6 +15,7 @@ jobs:
       matrix:
         cross_host:
           - x86_64-linux-musl
+          - aarch64-linux-musl
           - x86_64-w64-mingw32
           - i686-w64-mingw32
     steps:

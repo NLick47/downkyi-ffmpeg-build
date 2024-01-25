@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/bash -e
+
+set -o pipefail
 
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 
@@ -173,7 +175,6 @@ prepare_libx265() {
 			-DCMAKE_VERBOSE_MAKEFILE=ON \
 			-DENABLE_SHARED=OFF \
 			-DENABLE_LIBNUMA=OFF \
-			-DSTATIC_LINK_CRT=OFF \
 			-DENABLE_ASSEMBLY=OFF \
 			-DENABLE_CLI=OFF \
 			-DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
@@ -181,10 +182,8 @@ prepare_libx265() {
 			-DCMAKE_BUILD_TYPE=Release
 	else
 		cmake -G "Ninja" ../../source \
-			-DEXPORT_C_API=ON \
 			-DENABLE_SHARED=OFF \
 			-DENABLE_LIBNUMA=OFF \
-			-DSTATIC_LINK_CRT=ON \
 			-DENABLE_CLI=OFF \
 			-DCMAKE_SYSTEM_NAME="${TARGET_HOST}" \
 			-DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
@@ -192,9 +191,13 @@ prepare_libx265() {
 			-DCMAKE_CXX_COMPILER="${CROSS_HOST}-g++" \
 			-DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
 			-DCMAKE_BUILD_TYPE=Release
-		sed -i 's/-lgcc_s/-lgcc_eh/g' x265.pc
+		if [ x"${TARGET_ARCH}" == "xaarch64" ]; then
+			sed -i 's/-lgcc/-lgcc -lstdc++/g' x265.pc
+		else
+			sed -i 's/-lgcc_s/-lgcc_eh/g' x265.pc
+		fi
 	fi
-	ninja -v
+	ninja
 	ninja install
 }
 
@@ -238,6 +241,11 @@ prepare_dav1d() {
 		echo "strip = '${CROSS_HOST}-strip'" >>"${CROSS_HOST}.txt"
 		echo "ar = '${CROSS_HOST}-ar'" >>"${CROSS_HOST}.txt"
 		echo "ld = '${CROSS_HOST}-ld'" >>"${CROSS_HOST}.txt"
+		echo "[host_machine]" >>"${CROSS_HOST}.txt"
+		echo "system = '${TARGET_OS,,}'" >>"${CROSS_HOST}.txt"
+		echo "cpu_family = '${TARGET_ARCH}'" >>"${CROSS_HOST}.txt"
+		echo "cpu = '${TARGET_ARCH}'" >>"${CROSS_HOST}.txt"
+		echo "endian = 'little'" >>"${CROSS_HOST}.txt"
 	fi
 	meson setup \
 		--buildtype=release \
@@ -276,6 +284,7 @@ build_ffmpeg() {
 	else
 		EXTRA_CFLAGS="-I{$CROSS_PREFIX}/include"
 		EXTRA_LDFLAGS="-L${CROSS_PREFIX}/lib"
+		FFMPEG_CONFIG+=("--strip="${CROSS_HOST}-strip"")
 		FFMPEG_CONFIG+=("--extra-ldexeflags=-static")
 	fi
 
