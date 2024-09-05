@@ -262,7 +262,7 @@ prepare_dav1d() {
 }
 
 build_ffmpeg() {
-	ffmpeg_tag="6.1.1"
+	ffmpeg_tag="6.1.2"
 	ffmpeg_latest_url="https://www.ffmpeg.org/releases/ffmpeg-${ffmpeg_tag}.tar.gz"
 	if [ ! -f "${DOWNLOADS_DIR}/ffmpeg-${ffmpeg_tag}.tar.gz" ]; then
 		wget -cT10 -O "${DOWNLOADS_DIR}/ffmpeg-${ffmpeg_tag}.tar.gz.part" "${ffmpeg_latest_url}"
@@ -304,19 +304,18 @@ build_ffmpeg() {
 		--enable-version3 \
 		--enable-static \
 		--disable-muxers \
-		--enable-muxer=mp4,mp3,flv,adts \
+		--enable-muxer=mp4,mp3,flv,adts,flac \
 		--disable-demuxers \
-		--enable-demuxer=mov,mp3,flv,aac \
+		--enable-demuxer=mov,mp3,flv,aac,flac \
 		--disable-encoders \
-		--enable-encoder=libx264,libx265,aac,av1,libmp3lame \
+		--enable-encoder=libx264,libx265,aac,av1,libmp3lame,flac \
 		--disable-decoders \
-		--enable-decoder=h264,hevc,aac,av1,mp3,libdav1d \
+		--enable-decoder=h264,hevc,aac,av1,mp3,libdav1d,flac \
 		--disable-protocols \
 		--enable-protocol=file \
 		--disable-filters \
-		--enable-filter=delogo \
+		--enable-filter=delogo,aresample \
 		--disable-swscale \
-		--disable-swresample \
 		--disable-bsfs \
 		--disable-avdevice \
 		--disable-shared \
