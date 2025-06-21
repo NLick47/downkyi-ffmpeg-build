@@ -304,18 +304,18 @@ build_ffmpeg() {
 		--enable-version3 \
 		--enable-static \
 		--disable-muxers \
-		--enable-muxer=mp4,mp3,flv,adts,flac \
+		--enable-muxer=mp4,mp3,flv,adts,flac,image2 \
 		--disable-demuxers \
 		--enable-demuxer=mov,mp3,flv,aac,flac \
 		--disable-encoders \
-		--enable-encoder=libx264,libx265,aac,av1,libmp3lame,flac \
+		--enable-encoder=libx264,libx265,aac,av1,libmp3lame,flac,mjpeg \
 		--disable-decoders \
 		--enable-decoder=h264,hevc,aac,av1,mp3,libdav1d,flac \
 		--disable-protocols \
 		--enable-protocol=file \
 		--disable-filters \
-		--enable-filter=delogo,aresample \
-		--disable-swscale \
+		--enable-filter=delogo,aresample,scale \
+		--enable-swscale \
 		--disable-bsfs \
 		--disable-avdevice \
 		--disable-shared \
@@ -323,6 +323,8 @@ build_ffmpeg() {
 		--enable-libx264 \
 		--enable-libx265 \
 		--enable-libdav1d \
+		--disable-ffplay \
+		--disable-ffprobe \
 		--enable-libmp3lame
 	make -j
 	make install
